@@ -85,7 +85,7 @@ def create_message(*, cookies, name: str, theme: str = "", message: str = "") ->
         return response.text
     else:
         # Ask the chatbot a prompt
-        prompt = f"Compose a short pleasant message for {name} with about '{theme}'."
+        prompt = f"Compose a new unique short pleasant message for {name} with about '{theme}'."
         response = chatbot.chat(prompt)
         Message.wait_until_done(response)
         return response.text
