@@ -1,7 +1,7 @@
 import pandas as pd
 from hugchat.login import Login
 
-from config import AI_PASSWORD, AI_USERNAME, EXCEL_FILE_PATH
+from config import EXCEL_FILE_PATH, HUGGING_CHAT_PASSWORD, HUGGING_CHAT_USERNAME
 from utils import create_message, send_email
 
 
@@ -17,7 +17,7 @@ def send_invitation_message(excel_file) -> int:
     success_counter = 0
 
     # Log in to huggingface and grant authorization to huggingchat
-    sign = Login(AI_USERNAME, AI_PASSWORD)
+    sign = Login(HUGGING_CHAT_USERNAME, HUGGING_CHAT_PASSWORD)
     cookies = sign.login()
 
     # Loop through each row with data
@@ -26,13 +26,13 @@ def send_invitation_message(excel_file) -> int:
             # Gather contact info
             full_name = row["Name"]
             name = full_name.split(" ")[0]
-            email = row["Email Address"]
             invited = row["Invited?"]
-            death_date = row["Death Date"]
-            # phone = row['Phone Number']
+            email = row["Email Address"] if str(row["Email Address"]) != "nan" else ""
+            death_date = row["Death Date"] if str(row["Death Date"]) != "NaT" else ""
+            # phone = row['Phone Number'] if str(row["Phone Number"]) != "nan" else ""
 
             # Check if they have not been invited yet, have a valid form of contacting them, and have not passed away
-            if invited == "No" and email and not isinstance(death_date, str):
+            if invited == "No" and email and not death_date:
 
                 # Create a custom message using the contact name
                 interesting_fact = create_message(
@@ -46,7 +46,7 @@ def send_invitation_message(excel_file) -> int:
                 message = (
                     f"\n"
                     f"Hello {name}, Welcome to the Contact Automation Subscription Service. If you agree, I will send "
-                    f"you a pleasant holiday and happy birthday message on the correct day. Text Brett Altena YES to "
+                    f"you a pleasant holiday and happy birthday message on the correct day. Respond with YES to "
                     f"opt into the service or NO to receive no more messages.\n\nFor fun, here is one interesting fact "
                     f"about your name:\n{interesting_fact}"
                 )
@@ -71,6 +71,13 @@ def send_invitation_message(excel_file) -> int:
                 # Increment the success counter and print a separator row
                 success_counter += 1
                 print()
+
+            else:
+                # Display whether the current contact has been invited or if they were ineligible
+                if invited == "Yes":
+                    print(f"{name} has already been invited!\n")
+                else:
+                    print(f"{name} is not eligible to be invited.\n")
 
         # Capture any unhandled exceptions
         except Exception as e:

@@ -5,7 +5,7 @@ import holidays
 import pandas as pd
 from hugchat.login import Login
 
-from config import AI_PASSWORD, AI_USERNAME, EXCEL_FILE_PATH
+from config import EXCEL_FILE_PATH, HUGGING_CHAT_PASSWORD, HUGGING_CHAT_USERNAME
 from utils import create_message, send_email, send_text_message
 
 
@@ -24,7 +24,7 @@ def send_greetings(excel_file, holidays_us):
     today = datetime.now().date()
 
     # Log in to huggingface and grant authorization to huggingchat
-    sign = Login(AI_USERNAME, AI_PASSWORD)
+    sign = Login(HUGGING_CHAT_USERNAME, HUGGING_CHAT_PASSWORD)
     cookies = sign.login()
 
     # Loop through all contacts
@@ -34,11 +34,11 @@ def send_greetings(excel_file, holidays_us):
         full_name = row["Name"]
         name = full_name.split(" ")[0]
         age = row["Age"]
-        email = row["Email Address"]
-        phone = row["Phone Number"]
         birthday = row["Birth Date"].date()
         agreed = row["Agreed to Subscription"]
-        death_date = row["Death Date"]
+        email = row["Email Address"] if str(row["Email Address"]) != "nan" else ""
+        phone = row["Phone Number"] if str(row["Phone Number"]) != "nan" else ""
+        death_date = row["Death Date"] if str(row["Death Date"]) != "NaT" else ""
 
         # Ensure that the contact has agreed to be messaged and that they have not passed away
         if agreed == "Yes" and not isinstance(death_date, str):
@@ -98,8 +98,11 @@ def send_greetings(excel_file, holidays_us):
                 print()
 
     # Display how many people were notified today
-    print(f"{birthday_counter} contacts successfully wished happy birthday!")
-    print(f"{holiday_counter} contacts successfully wished a happy holiday!")
+    if birthday_counter or holiday_counter:
+        print(f"{birthday_counter} contacts successfully wished happy birthday!")
+        print(f"{holiday_counter} contacts successfully wished a happy holiday!\n")
+    else:
+        print("It was no one's birthday and it was not a US holiday today.\n")
 
 
 # Load the Excel file
