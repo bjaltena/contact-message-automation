@@ -1,0 +1,11 @@
+# Ignore confidential files
+config.py
+*.xlsx
+
+# Ignore PyCharm IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+*.idea/
+__pycache__/
